@@ -2,7 +2,7 @@
 %global SVNREV 188105
 # Note, gcc_release must be integer, if you want to add suffixes to
 # %{release}, append them after %{gcc_release} on Release: line.
-%global gcc_release 4
+%global gcc_release 8
 %global _unpackaged_files_terminate_build 0
 %global multilib_64_archs sparc64 ppc64 s390x x86_64
 %ifarch s390x
@@ -20,7 +20,7 @@
 Summary: Compatibility GNU Compiler Collection
 Name: compat-gcc-44
 Version: 4.4.7
-Release: %{gcc_release}.1%{?dist}
+Release: %{gcc_release}%{?dist}
 # libgcc, libgfortran, libmudflap, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
 License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions
@@ -275,16 +275,17 @@ cd obj-%{gcc_target_platform}
 
 CC=gcc
 OPT_FLAGS=`echo %{optflags}|sed -e 's/\(-Wp,\)\?-D_FORTIFY_SOURCE=[12]//g'`
+OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-fstack-protector-strong/-fstack-protector/g'`
 OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-m64//g;s/-m32//g;s/-m31//g'`
 %ifarch sparc
 OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-mcpu=ultrasparc/-mtune=ultrasparc/g;s/-mcpu=v[78]//g'`
 %endif
 OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-grecord-gcc-switches//g'`
 %ifarch %{ix86}
-OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=i.86//g'`
+OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=i.86//g;s/-march=x86_64//g;s/-mfpmath=sse//g'`
 %endif
 %ifarch ppc ppc64
-OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=power[467]//g;s/-mtune=power[678]//g'`
+OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=power[4678]//g;s/-mtune=power[678]//g'`
 %endif
 %ifarch s390 s390x
 OPT_FLAGS=`echo $OPT_FLAGS|sed -e 's/-march=z10//g;s/-march=z196//g;s/-mtune=zEC12//g'`
@@ -863,7 +864,20 @@ rm -rf %{buildroot}
 %doc rpm.doc/gfortran/*
 
 %changelog
-* Mon Nov 01 2013 Marek Polacek <polacek@redhat.com> 4.4.7-4
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 4.4.7-8
+- Mass rebuild 2014-01-24
+
+* Tue Jan  7 2014 Jakub Jelinek <jakub@redhat.com> 4.4.7-7
+- change -fstack-protector-strong to -fstack-protector in optflags,
+  remove -march=x86-64 and -mfpmath=sse for ix86 (#1048852)
+
+* Mon Jan  6 2014 Marek Polacek <polacek@redhat.com> 4.4.7-6
+- #1043605: fix bogus CL date
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> 4.4.7-5
+- mass rebuild 2013-12-27
+
+* Fri Nov  1 2013 Marek Polacek <polacek@redhat.com> 4.4.7-4
 - don't obsolete compat-libstdc++-33 (#1031748)
 
 * Sat Jul 20 2013 Jakub Jelinek <jakub@redhat.com> 4.4.7-3
